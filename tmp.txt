@@ -1,0 +1,17 @@
+all: os-image
+
+os-image: boot.o kernel.o
+	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-ld -m elf_i386 -T link.ld -o os.elf boot.o kernel.o
+	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-objcopy -O binary os.elf os-image.bin
+
+boot.o: boot.asm
+	C:\Users\OFFICE\AppData\Local\bin\NASM\nasm -f elf boot.asm -o boot.o
+
+kernel.o: kernel.c
+	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-gcc -m32 -ffreestanding -c kernel.c -o kernel.o
+
+run: os-image
+	C:\msys64\mingw64\bin\qemu-system-i386 -fda os-image.bin
+
+clean:
+	rm -f *.o *.bin *.elf
