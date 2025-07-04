@@ -1,4 +1,5 @@
-C:\mingw\w64devkit\bin\make.exe run
+C:\mingw\w64devkit\bin\make.exe clean
+C:\mingw\w64devkit\bin\make.exe
 
 @REM C:\Users\OFFICE\AppData\Local\bin\NASM\nasm -f elf boot.asm -o boot.o
 

@@ -1,18 +1,30 @@
-all: os-image
+NASM = nasm.exe
+CC = C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-gcc
+LD = C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-ld
+OBJCOPY = C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-objcopy
+PYTHON = python
 
-os-image: boot.o kernel.o
-	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-ld -T link.ld -o kernel.elf kernel.o
-	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-objcopy -O binary kernel.elf kernel.bin
-	copy /b boot.bin + kernel.bin os-image.bin
+all: run
 
-boot.o: boot.asm
-	C:\msys64\usr\bin\nasm.exe -f bin boot.asm -o boot.bin
+# 부트로더는 raw binary로 생성 (elf 아님)
+boot.bin: boot.asm
+	$(NASM) -f bin boot.asm -o boot.bin
+	$(PYTHON) boot.py
 
 kernel.o: kernel.c
-	C:\Users\OFFICE\Desktop\works\i686-elf-tools-windows\bin\i686-elf-gcc -m32 -ffreestanding -c kernel.c -o kernel.o
+	$(CC) -m32 -ffreestanding -fno-pie -fno-stack-protector -c kernel.c -o kernel.o
 
-run: os-image
-	C:\msys64\mingw64\bin\qemu-system-i386 -fda os-image.bin
+kernel.elf: kernel.o link.ld
+	$(LD) -T link.ld -m elf_i386 -o kernel.elf kernel.o
+
+kernel.bin: kernel.elf
+	$(OBJCOPY) -O binary kernel.elf kernel.bin
+
+os-image.bin: boot.bin kernel.bin
+	copy /b boot.bin + kernel.bin os-image.bin
+
+run: os-image.bin
+	qemu-system-x86_64 -fda os-image.bin
 
 clean:
-	rm -f *.o *.bin *.elf
+	del /F /Q *.bin *.elf *.o *.img

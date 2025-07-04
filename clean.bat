@@ -1,0 +1,1 @@
+C:\mingw\w64devkit\bin\make.exe clean
